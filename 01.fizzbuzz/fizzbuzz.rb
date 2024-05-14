@@ -1,12 +1,11 @@
-(1..20).each do |number|
+1.upto(20) do |number|
   if number % 15 == 0
-    puts 'fizzbuzz'
+    puts 'FizzBuzz'
   elsif number % 3 == 0
-    puts 'fizz'
+    puts 'Fizz'
   elsif number % 5 == 0
-    puts 'buzz'
+    puts 'Buzz'
   elsif
     puts number
   end
 end
-
