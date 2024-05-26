@@ -17,19 +17,12 @@ last_day = Date.new(year, month, -1)
 header = "#{month}月 #{year}"
 puts header.center(20)
 
+all_days = "   " * first_day.wday
+
 (first_day..last_day).each do |date|
-  if date.day == 1
-    x = date.wday
-    if date.wday == 6
-      all_days = "   " * x + " 1\n"
-    else
-      all_days = "   " * x + " 1 "
-    end
-  elsif date.wday == 6
-    all_days = date.day.to_s.rjust(2) + "\n"
-  else
-    all_days = date.day.to_s.rjust(2) + " "
-  end
-  print all_days
+  all_days += date.day.to_s.rjust(2)
+  all_days += date.saturday? ? "\n" : " "
 end
+
+print all_days
 
