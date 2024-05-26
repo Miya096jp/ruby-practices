@@ -23,6 +23,6 @@ all_days = "   " * first_day.wday
   all_days += date.day.to_s.rjust(2)
   all_days += date.saturday? ? "\n" : " "
 end
-
+#最後の行は改行
 print all_days
 
