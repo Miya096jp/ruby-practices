@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 require 'date'
 require 'optparse'
-require 'debug'
 
 default_year = Date.today.year
 default_month = Date.today.month
@@ -20,9 +19,8 @@ puts header.center(20)
 all_days = "   " * first_day.wday
 
 (first_day..last_day).each do |date|
-  all_days += date.day.to_s.rjust(2)
+  all_days += date.day == last_day.day ? "\n" : date.day.to_s.rjust(2)
   all_days += date.saturday? ? "\n" : " "
 end
-#最後の行は改行
-print all_days
 
+print all_days
