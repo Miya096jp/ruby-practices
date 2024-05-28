@@ -15,6 +15,7 @@ last_day = Date.new(year, month, -1)
 
 header = "#{month}月 #{year}"
 puts header.center(20)
+print "日 月 火 水 木 金 土\n"
 
 all_days = "   " * first_day.wday
 
