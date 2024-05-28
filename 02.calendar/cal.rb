@@ -20,8 +20,8 @@ print "日 月 火 水 木 金 土\n"
 all_days = "   " * first_day.wday
 
 (first_day..last_day).each do |date|
-  all_days += date.day == last_day.day ? "\n" : date.day.to_s.rjust(2)
-  all_days += date.saturday? ? "\n" : " "
+  all_days += date.day.to_s.rjust(2)
+  all_days += date.saturday? || date == last_day ? "\n" : " "
 end
 
 print all_days
