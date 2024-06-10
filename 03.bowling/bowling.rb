@@ -23,12 +23,14 @@ frames[9..] = [frames[9..].each do |frame|
   frame.delete_at 1 if frame[0] == FULL_SCORE
 end.flatten]
 
-point = 0
-
 def strike_shot(frames, idx)
   case idx
   when 0..7
-    frames[idx + 1][0] == FULL_SCORE ? 20 + frames[idx + 2][0] : FULL_SCORE + frames[idx + 1].sum
+    if frames[idx + 1][0] == FULL_SCORE
+      FULL_SCORE * 2 + frames[idx + 2][0]
+    else
+      FULL_SCORE + frames[idx + 1].sum
+    end
   when 8
     frames[idx][0] + frames[9][0..1].sum
   else
@@ -36,18 +38,18 @@ def strike_shot(frames, idx)
   end
 end
 
-def score_shot(frames, idx)
+def spare_shot(frames, idx)
   frames[idx].sum + frames[idx + 1][0]
 end
 
-frames.each.with_index do |frame, idx|
-  point += if frame[0] == FULL_SCORE 
-             strike_shot(frames, idx)
-           elsif frame.sum == FULL_SCORE
-             score_shot(frames, idx)
-           else
-             frame.sum
-           end
+point = frames.each.with_index.sum do |frame, idx|
+  if frame[0] == FULL_SCORE 
+    strike_shot(frames, idx)
+  elsif frame.sum == FULL_SCORE
+    spare_shot(frames, idx)
+  else
+    frame.sum
+  end
 end
 
 p point
