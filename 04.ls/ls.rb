@@ -6,31 +6,32 @@ all_entries = Dir.entries('.')
 
 def filter_entries(entries_original)
   entries_original.reject do |entry|
-    entry == '.' || entry == '..' || entry =~ /^\./
+    entry =~ /\A\./
   end
 end
 
 entries = filter_entries(all_entries)
-column = 3
+longest_entry = entries.max { |a, b| a.length <=> b.length }
+INTERVAL = longest_entry.length
+COLUMN = 3
 
 def find_row(entries, column)
-  (entries.size % column).zero? ? entries.size / column : entries.size / column + 1
+  entries.size.ceildiv(column)
 end
 
-row = find_row(entries, column)
+row = find_row(entries, COLUMN)
 
 def transpose_entries(entries, column, row)
   entries += [nil] * (column * row - entries.size)
   entries.each_slice(row).to_a.transpose
 end
 
-def display_entries(transposed_entries)
+def display_entries(transposed_entries, interval)
   transposed_entries.map do |entries|
-    entries.map do |entry|
-      entry&.ljust(25)
-    end.push "\n"
-  end.join
+    entries.map { |entry| entry&.ljust(interval) }.join
+  end.join("\n")
 end
 
-transposed_entries = transpose_entries(entries, column, row)
-print display_entries(transposed_entries)
+transposed_entries = transpose_entries(entries, COLUMN, row)
+print transposed_entries
+print display_entries(transposed_entries, INTERVAL)
