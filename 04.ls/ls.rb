@@ -15,11 +15,7 @@ entries = filter_entries(all_entries)
 longest_entry = entries.max_by(&:length)
 max_filename_length = longest_entry.length
 
-def find_row(entries, column)
-  entries.size.ceildiv(column)
-end
-
-row = find_row(entries, COLUMN)
+row = entries.size.ceildiv(COLUMN)
 
 def transpose_entries(entries, column, row)
   entries += [nil] * (column * row - entries.size)
