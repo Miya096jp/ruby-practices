@@ -12,7 +12,7 @@ def filter_entries(entries_original)
 end
 
 entries = filter_entries(all_entries)
-longest_entry = entries.max { |a, b| a.length <=> b.length }
+longest_entry = entries.max_by(&:length)
 max_filename_length = longest_entry.length
 
 def find_row(entries, column)
