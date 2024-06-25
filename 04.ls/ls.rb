@@ -2,6 +2,7 @@
 
 # frozen_string_literal: true
 
+COLUMN = 3
 all_entries = Dir.entries('.')
 
 def filter_entries(entries_original)
@@ -12,8 +13,7 @@ end
 
 entries = filter_entries(all_entries)
 longest_entry = entries.max { |a, b| a.length <=> b.length }
-INTERVAL = longest_entry.length
-COLUMN = 3
+max_filename_length = longest_entry.length
 
 def find_row(entries, column)
   entries.size.ceildiv(column)
@@ -26,11 +26,11 @@ def transpose_entries(entries, column, row)
   entries.each_slice(row).to_a.transpose
 end
 
-def display_entries(transposed_entries, interval)
+def display_entries(transposed_entries, max_filename_length)
   transposed_entries.map do |entries|
-    entries.map { |entry| entry&.ljust(interval) }.join
+    entries.map { |entry| entry&.ljust(max_filename_length) }.join
   end.join("\n")
 end
 
 transposed_entries = transpose_entries(entries, COLUMN, row)
-print display_entries(transposed_entries, INTERVAL)
+print display_entries(transposed_entries, max_filename_length)
