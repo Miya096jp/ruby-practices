@@ -6,7 +6,7 @@ all_entries = Dir.entries('.')
 
 def filter_entries(entries_original)
   entries_original.reject do |entry|
-    entry =~ /\A\./
+    entry.start_with?('.')
   end
 end
 
@@ -33,5 +33,4 @@ def display_entries(transposed_entries, interval)
 end
 
 transposed_entries = transpose_entries(entries, COLUMN, row)
-print transposed_entries
 print display_entries(transposed_entries, INTERVAL)
