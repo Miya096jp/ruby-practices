@@ -29,4 +29,4 @@ def display_entries(transposed_entries, max_filename_length)
 end
 
 transposed_entries = transpose_entries(entries, COLUMN, row)
-print display_entries(transposed_entries, max_filename_length)
+print display_entries(transposed_entries, max_filename_length) + "\n"
