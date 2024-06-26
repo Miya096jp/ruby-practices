@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 
 COLUMN = 3
-all_entries = Dir.entries('.')
+all_entries = Dir.entries('.').sort
 
 def filter_entries(entries_original)
   entries_original.reject do |entry|
