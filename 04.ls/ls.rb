@@ -2,8 +2,11 @@
 
 # frozen_string_literal: true
 
+require 'optparse'
 COLUMN = 3
 all_entries = Dir.entries('.').sort
+
+options = ARGV.getopts('a')
 
 def filter_entries(entries_original)
   entries_original.reject do |entry|
@@ -11,7 +14,8 @@ def filter_entries(entries_original)
   end
 end
 
-entries = filter_entries(all_entries)
+entries = options['a'] ? all_entries : filter_entries(all_entries)
+
 longest_entry = entries.max_by(&:length)
 max_filename_length = longest_entry.length
 
