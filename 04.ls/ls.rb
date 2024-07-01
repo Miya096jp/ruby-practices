@@ -6,7 +6,7 @@ require 'optparse'
 COLUMN = 3
 all_entries = Dir.entries('.').sort
 
-options = ARGV.getopts('a')
+options = ARGV.getopts('r')
 
 def filter_entries(entries_original)
   entries_original.reject do |entry|
@@ -14,7 +14,9 @@ def filter_entries(entries_original)
   end
 end
 
-entries = options['a'] ? all_entries : filter_entries(all_entries)
+filtered_entries = filter_entries(all_entries)
+
+entries = options['r'] ? filtered_entries.reverse : filtered_entries
 
 longest_entry = entries.max_by(&:length)
 max_filename_length = longest_entry.length
