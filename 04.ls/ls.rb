@@ -41,7 +41,6 @@ transposed_entries = transpose_entries(filtered_entries, COLUMN, row)
 
 # ここより以下はlオプションの実装
 
-
 def format_filetype_and_mode(file_stats)
   filetype_and_mode_octal = file_stats.mode.to_s(8)
   filetype_and_mode_binary = file_stats.mode.to_s(2)
@@ -51,22 +50,23 @@ def format_filetype_and_mode(file_stats)
   group = filetype_and_mode_octal[-2]
   other = filetype_and_mode_octal[-1]
 
-[
-  converted_filetype,
-  filetype_and_mode_binary[4] == '1' ? SUID_OR_SGID[owner] : NORMAL_PERMISSION[owner],
-  filetype_and_mode_binary[4] == '1' ? SUID_OR_SGID[owner] : NORMAL_PERMISSION[owner],
-  filetype_and_mode_binary[4] == '1' ? STICKY_BIT[owner] : NORMAL_PERMISSION[owner]
-].join
+  [
+    converted_filetype,
+    filetype_and_mode_binary[4] == '1' ? SUID_OR_SGID[owner] : NORMAL_PERMISSION[owner],
+    filetype_and_mode_binary[4] == '1' ? SUID_OR_SGID[group] : NORMAL_PERMISSION[group],
+    filetype_and_mode_binary[4] == '1' ? STICKY_BIT[other] : NORMAL_PERMISSION[other]
+  ].join
 end
-
 
 def format_timestamp(file_stats)
   timestamp = file_stats.mtime.to_s
   month = timestamp[5..6]
   date = timestamp[8..9]
   time = timestamp[11..15]
-  month = "#{ month[1]}" if month[0] == '0'
-  date = "#{ date[1]}" if date[0] == '0'
+  month[0] = ' ' if month[0] == '0'
+  month = "#{month[0]}#{month[1]}"
+  date[0] = ' ' if date[0] == '0'
+  date = "#{date[0]}#{date[1]}"
   month.rjust(3) + date.rjust(3) + time.rjust(6)
 end
 
@@ -94,10 +94,10 @@ total_block_to_display = total_blocks(file_stats)
 
 transposed_file_stats = converted_file_stats.transpose
 
-max_lengths = transposed_file_stats.map.with_index { |file_stat, index| index != 0 ? file_stat.max_by(&:length).length : file_stat.max_by(&:length).length }
+max_lengths = transposed_file_stats.map.with_index { |file_stat, index| file_stat.max_by(&:length).length if index != 0 }
 
-file_stats_to_display =
-  transposed_file_stats.map.with_index { |file_stat, index| file_stat.map { _1.rjust(max_lengths[index]) } }.transpose.map{ |attribute| attribute.join(' ') }.join("\n")
+justify_file_stats = transposed_file_stats.map.with_index { |file_stat, index| file_stat.map { _1.rjust(max_lengths[index]) } }.transpose
+file_stats_to_display = justify_file_stats.map { |attribute| attribute.join(' ') }.join("\n")
 
 if options['l']
   puts "total #{total_block_to_display}"
