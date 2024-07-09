@@ -41,43 +41,24 @@ transposed_entries = transpose_entries(filtered_entries, COLUMN, row)
 
 # ここより以下はlオプションの実装
 
-def convert_filetype(filetype)
-  CONVERT_FILETYPE[filetype]
-end
-
-def normal_permission(user_type)
-  NORMAL_PERMISSION[user_type]
-end
-
-def suid_or_sgid(user_type)
-  SUID_OR_SGID[user_type]
-end
-
-def sticky_bit(user_type)
-  STICKY_BIT[user_type]
-end
 
 def format_filetype_and_mode(file_stats)
-  filetype_and_mode = file_stats.mode.to_s(8)
-  filetype = filetype_and_mode[..-5]
-  converted_filetype = convert_filetype(filetype)
-  permission_type = filetype_and_mode[-4]
-  owner = filetype_and_mode[-3]
-  group = filetype_and_mode[-2]
-  other = filetype_and_mode[-1]
+  filetype_and_mode_octal = file_stats.mode.to_s(8)
+  filetype_and_mode_binary = file_stats.mode.to_s(2)
+  filetype = filetype_and_mode_octal[..-5]
+  converted_filetype = CONVERT_FILETYPE[filetype]
+  owner = filetype_and_mode_octal[-3]
+  group = filetype_and_mode_octal[-2]
+  other = filetype_and_mode_octal[-1]
 
-  converted_filetype +
-    case permission_type
-    when '0'
-      normal_permission(owner) + normal_permission(group) + normal_permission(other)
-    when '1'
-      normal_permission(owner) + normal_permission(group) + sticky_bit(other)
-    when '2'
-      suid_or_sgid(owner) + normal_permission(group) + normal_permission(other)
-    when '4'
-      normal_permission(owner) + suid_or_sgid(group) + normal_permission(other)
-    end
+[
+  converted_filetype,
+  filetype_and_mode_binary[4] == '1' ? SUID_OR_SGID[owner] : NORMAL_PERMISSION[owner],
+  filetype_and_mode_binary[4] == '1' ? SUID_OR_SGID[owner] : NORMAL_PERMISSION[owner],
+  filetype_and_mode_binary[4] == '1' ? STICKY_BIT[owner] : NORMAL_PERMISSION[owner]
+].join
 end
+
 
 def format_timestamp(file_stats)
   timestamp = file_stats.mtime.to_s
