@@ -65,8 +65,8 @@ def format_timestamp(file_stats)
   month = timestamp[5..6]
   date = timestamp[8..9]
   time = timestamp[11..15]
-  month[0] = ' ' if month[0] == '0'
-  date[0] = ' ' if date[0] == '0'
+  month = "#{ month[1]}" if month[0] == '0'
+  date = "#{ date[1]}" if date[0] == '0'
   month.rjust(3) + date.rjust(3) + time.rjust(6)
 end
 
@@ -94,10 +94,10 @@ total_block_to_display = total_blocks(file_stats)
 
 transposed_file_stats = converted_file_stats.transpose
 
-max_lengths = transposed_file_stats.map.with_index { |file_stat, index| index != 0 ? file_stat.max_by(&:length).length + 1 : file_stat.max_by(&:length).length }
+max_lengths = transposed_file_stats.map.with_index { |file_stat, index| index != 0 ? file_stat.max_by(&:length).length : file_stat.max_by(&:length).length }
 
 file_stats_to_display =
-  transposed_file_stats.map.with_index { |file_stat, index| file_stat.map { _1.rjust(max_lengths[index]) } }.transpose.map(&:join).join("\n")
+  transposed_file_stats.map.with_index { |file_stat, index| file_stat.map { _1.rjust(max_lengths[index]) } }.transpose.map{ |attribute| attribute.join(' ') }.join("\n")
 
 if options['l']
   puts "total #{total_block_to_display}"
