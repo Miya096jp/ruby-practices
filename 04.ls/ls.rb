@@ -94,7 +94,7 @@ total_block_to_display = total_blocks(file_stats)
 
 transposed_file_stats = converted_file_stats.transpose
 
-max_lengths = transposed_file_stats.map.with_index { |file_stat, index| file_stat.max_by(&:length).length if index != 0 }
+max_lengths = transposed_file_stats.map { |file_stat| file_stat.max_by(&:length).length }
 
 justify_file_stats = transposed_file_stats.map.with_index { |file_stat, index| file_stat.map { _1.rjust(max_lengths[index]) } }.transpose
 file_stats_to_display = justify_file_stats.map { |attribute| attribute.join(' ') }.join("\n")
