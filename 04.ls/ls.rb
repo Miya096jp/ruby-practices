@@ -96,7 +96,12 @@ transposed_file_stats = converted_file_stats.transpose
 
 max_lengths = transposed_file_stats.map { |file_stat| file_stat.max_by(&:length).length }
 
-justify_file_stats = transposed_file_stats.map.with_index { |file_stat, index| file_stat.map { _1.rjust(max_lengths[index]) } }.transpose
+justify_file_stats = transposed_file_stats.map.with_index do |file_stat, index|
+  file_stat.map do |attribute|
+    index == 6 ? attribute.ljust(max_lengths[index]) : attribute.rjust(max_lengths[index])
+  end
+end.transpose
+
 file_stats_to_display = justify_file_stats.map { |attribute| attribute.join(' ') }.join("\n")
 
 if options['l']
