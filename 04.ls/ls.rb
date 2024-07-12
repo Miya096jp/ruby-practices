@@ -64,10 +64,8 @@ def format_timestamp(file_stats)
   date = timestamp[8..9]
   time = timestamp[11..15]
   month[0] = ' ' if month[0] == '0'
-  month = "#{month[0]}#{month[1]}"
   date[0] = ' ' if date[0] == '0'
-  date = "#{date[0]}#{date[1]}"
-  month.rjust(3) + date.rjust(3) + time.rjust(6)
+  "#{month.rjust(3)}#{date.rjust(3)}#{time.rjust(6)}"
 end
 
 def convert_file_stats_into_strings(file_stats, entry_names)
