@@ -11,7 +11,7 @@ SUID_OR_SGID = { '0' => '---', '1' => '--s', '2' => '-wS', '3' => '-ws', '4' => 
 STICKY_BIT = { '0' => '---', '1' => '--t', '2' => '-wT', '3' => '-wt', '4' => 'r-T', '5' => 'r-t', '6' => 'rwT', '7' => 'rwt' }.freeze
 all_entries = Dir.entries('.').sort
 
-options = ARGV.getopts('l')
+options = ARGV.getopts('a', 'r', 'l')
 
 def filter_entries(entries_original)
   entries_original.reject do |entry|
@@ -19,12 +19,13 @@ def filter_entries(entries_original)
   end
 end
 
-filtered_entries = filter_entries(all_entries)
+all_entries = all_entries.reverse if options['r']
+entries_to_display = options['a'] ? all_entries : filter_entries(all_entries)
 
-longest_entry = filtered_entries.max_by(&:length)
+longest_entry = entries_to_display.max_by(&:length)
 max_filename_length = longest_entry.length
 
-row = filtered_entries.size.ceildiv(COLUMN)
+row = entries_to_display.size.ceildiv(COLUMN)
 
 def transpose_entries(entries, column, row)
   entries += [nil] * (column * row - entries.size)
@@ -37,7 +38,7 @@ def display_entries(transposed_entries, max_filename_length)
   end.join("\n")
 end
 
-transposed_entries = transpose_entries(filtered_entries, COLUMN, row)
+transposed_entries = transpose_entries(entries_to_display, COLUMN, row)
 
 # ここより以下はlオプションの実装
 
@@ -85,9 +86,9 @@ def total_blocks(file_stats)
   file_stats.map.sum { |file| file.blocks.to_i }
 end
 
-file_stats = filtered_entries.map { |entry| File.stat(entry) }
+file_stats = entries_to_display.map { |entry| File.stat(entry) }
 
-converted_file_stats = convert_file_stats_into_strings(file_stats, filtered_entries)
+converted_file_stats = convert_file_stats_into_strings(file_stats, entries_to_display)
 total_block_to_display = total_blocks(file_stats)
 
 transposed_file_stats = converted_file_stats.transpose
