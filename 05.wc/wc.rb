@@ -5,6 +5,8 @@
 require 'optparse'
 require 'debug'
 
+KEYS = %i[lines words bytes].freeze
+
 opt = OptionParser.new
 params = { count_lines: false, count_words: false, count_bytes: false }
 opt.on('-l') { |v| params[:count_lines] = v }
@@ -12,60 +14,96 @@ opt.on('-w') { |v| params[:count_words] = v }
 opt.on('-c') { |v| params[:count_bytes] = v }
 opt.parse!(ARGV)
 
-file_names = ARGV
-
-file_texts = if file_names[0]
-               file_names.map { |file_name| File.open(file_name, 'r').read }
-             else
-               [ARGF.readlines.join]
-             end
-
-def get_text_counts(file_texts)
-  file_texts.map do |file_text|
+def get_text_counts(file_texts, file_names)
+  file_texts.map.with_index do |file_text, idx|
     {
       lines: file_text.count("\n"),
       words: file_text.split(/\s+/).count,
-      bytes: file_text.to_s.bytesize
+      bytes: file_text.to_s.bytesize,
+      name: file_names[idx]
     }
   end
 end
 
-text_counts = get_text_counts(file_texts)
+# def get_total(text_counts)
+#   text_counts.each_with_object({}) do |text_count, total|
+#     text_count.each do |key, value|
+#       if key != :name
+#         total[key] ||= 0
+#         total[key] += value
+#       end
+#     end
+#     total[:name] = :total
+#   end
+# end
 
-def get_total(text_counts)
-  text_counts << text_counts.each_with_object({}) do |text_count, total|
-    text_count.each do |key, value|
-      total[key] ||= 0
-      total[key] += value
+# def format_text_counts(text_counts)
+#   max_length = KEYS.map do |key|
+#     text_counts.map { |text_count| text_count[key].to_s.size }.max
+#   end
+#   max_lengths = KEYS.zip(max_length).to_h
+
+#   text_counts.map do |text_count|
+#     {
+#       lines: text_count[:lines].to_s.rjust(max_lengths[:lines] >= 7 ? max_lengths[:lines] : 7),
+#       words: text_count[:words].to_s.rjust(max_lengths[:words] >= 7 ? max_lengths[:words] : 7),
+#       bytes: text_count[:bytes].to_s.rjust(max_lengths[:bytes] >= 7 ? max_lengths[:bytes] : 7),
+#       name: text_count[:name]
+#     }
+#   end
+# end
+
+# def get_total(text_counts)
+#   text_counts.each_with_object({}) do |text_count, total|
+#     text_count.each do |key, value|
+#       if key != :name
+#         total[key] ||= 0
+#         total[key] += value
+#       end
+#     end
+#     total[:name] = :total
+#   end
+# end
+
+# binding.break
+def format_text_counts(text_counts, file_names)
+  if file_names.size >= 2
+    text_counts << text_counts.each_with_object({}) do |text_count, total|
+      text_count.each do |key, value|
+        if key != :name
+          total[key] ||= 0
+          total[key] += value
+        end
+      end
+      total[:name] = :total
     end
   end
-end
 
-def format_text_counts(text_counts, file_names)
-  keys = text_counts.first.keys
-  max_length = keys.map do |key|
+  max_length = KEYS.map do |key|
     text_counts.map { |text_count| text_count[key].to_s.size }.max
   end
-  max_lengths = keys.zip(max_length).to_h
+  max_lengths = KEYS.zip(max_length).to_h
 
-  text_counts.map.with_index do |text_count, idx|
+  text_counts.map do |text_count|
     {
       lines: text_count[:lines].to_s.rjust(max_lengths[:lines] >= 7 ? max_lengths[:lines] : 7),
       words: text_count[:words].to_s.rjust(max_lengths[:words] >= 7 ? max_lengths[:words] : 7),
       bytes: text_count[:bytes].to_s.rjust(max_lengths[:bytes] >= 7 ? max_lengths[:bytes] : 7),
-      name: text_count[:name] = file_names[idx]
+      name: text_count[:name]
     }
   end
 end
 
-if file_names.size >= 2
-  file_names << 'total'
-  get_total(text_counts)
-end
-
-text_counts = format_text_counts(text_counts, file_names)
+#KEYS = [:lines, :words, :bytes]
 
 def render(text_counts, count_lines: false, count_words: false, count_bytes: false)
+  # KEYS.map do |key|
+  #   text_counts.map do |text_count|
+  #     text_count[key] 
+
+  #   end
+  # end
+
   text_counts.map do |text_count|
     elements = {
       lines: text_count[:lines],
@@ -74,13 +112,26 @@ def render(text_counts, count_lines: false, count_words: false, count_bytes: fal
       name: text_count[:name]
     }
 
-    unless !count_lines && !count_words && !count_bytes
+    if !count_lines && !count_words && !count_bytes
+      elements.values.join(' ')
+    else
       elements.delete(:lines) unless count_lines
       elements.delete(:words) unless count_words
       elements.delete(:bytes) unless count_bytes
+      elements.values.join(' ')
     end
-    elements.values.join(' ')
   end.join("\n")
 end
 
+file_names = ARGV
+file_texts = if file_names[0]
+               file_names.map { |file_name| File.open(file_name, 'r').read }
+             else
+               [ARGF.readlines.join]
+             end
+text_counts = get_text_counts(file_texts, file_names)
+# text_counts << get_total(text_counts) if file_names.size >= 2
+# text_counts = format_text_counts(text_counts)
+
+text_counts = format_text_counts(text_counts, file_names)
 puts render(text_counts, **params)
