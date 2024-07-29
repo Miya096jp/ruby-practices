@@ -8,11 +8,21 @@ require 'debug'
 KEYS = %i[lines words bytes name].freeze
 
 opt = OptionParser.new
-params = { count_lines: false, count_words: false, count_bytes: false }
-opt.on('-l') { |v| params[:count_lines] = v }
-opt.on('-w') { |v| params[:count_words] = v }
-opt.on('-c') { |v| params[:count_bytes] = v }
+options = { count_lines: false, count_words: false, count_bytes: false }
+opt.on('-l') { |v| options[:count_lines] = v }
+opt.on('-w') { |v| options[:count_words] = v }
+opt.on('-c') { |v| options[:count_bytes] = v }
 opt.parse!(ARGV)
+
+keys_to_keep = []
+if !options[:count_lines] && !options[:count_words] && !options[:count_bytes]
+  keys_to_keep = %i[lines words bytes name]
+else
+  keys_to_keep << :lines if options[:count_lines]
+  keys_to_keep << :words if options[:count_words]
+  keys_to_keep << :bytes if options[:count_bytes]
+  keys_to_keep << :name
+end
 
 def get_text_counts(file_texts, file_names)
   file_texts.map.with_index do |file_text, idx|
@@ -25,57 +35,49 @@ def get_text_counts(file_texts, file_names)
   end
 end
 
-def get_total_and_max_lengths(text_counts, file_names)
-  if file_names.size >= 2
-    total = text_counts.each_with_object({}) do |text_count, hash_for_totaling_values|
-      text_count.each do |key, value|
-        if key != :name
-          hash_for_totaling_values[key] ||= 0
-          hash_for_totaling_values[key] += value
-        end
+def get_total(text_counts)
+  total = text_counts.each_with_object({}) do |text_count, hash_for_totaling_values|
+    text_count.each do |key, value|
+      if key != :name
+        hash_for_totaling_values[key] ||= 0
+        hash_for_totaling_values[key] += value
       end
-      hash_for_totaling_values[:name] = :total
     end
+    hash_for_totaling_values[:name] = 'total'
   end
+  [total]
+end
 
-  max_length = KEYS[0..-2].map do |key|
+def get_max_lengths(text_counts, keys_to_keep)
+  max_lengths = keys_to_keep.map do |key|
     text_counts.map { |text_count| text_count[key].to_s.size }.max
   end
-  max_lengths = KEYS[0..-2].zip(max_length).to_h
-  [total, max_lengths]
+  keys_to_keep.zip(max_lengths).to_h
 end
 
-def format_text_counts(text_counts, max_lengths)
+def format_text_counts(text_counts, max_lengths, keys_to_keep)
   text_counts.map do |text_count|
     hash = {}
-    KEYS.each do |key|
-        hash[key] = if key != :name
-                      text_count[key].to_s.rjust(max_lengths[key] >= 7 ? max_lengths[key] : 7)
-                    else
-                      text_count[:name]
-                    end
-        end
-        hash
+    keys_to_keep.each do |key|
+      hash[key] = if key != :name
+                    text_count[key].to_s.rjust(max_lengths[key] >= 7 ? max_lengths[key] : 7)
+                  else
+                    text_count[:name]
+                  end
     end
+    hash
+  end
 end
 
-def render(text_counts, count_lines: false, count_words: false, count_bytes: false)
+def render_text_counts(text_counts)
   text_counts.map do |text_count|
-    elements = {
-      lines: text_count[:lines],
-      words: text_count[:words],
-      bytes: text_count[:bytes],
-      name: text_count[:name]
-    }
+    text_count.values.join(' ')
+  end.join("\n")
+end
 
-    if !count_lines && !count_words && !count_bytes
-      elements.values.join(' ')
-    else
-      elements.delete(:lines) unless count_lines
-      elements.delete(:words) unless count_words
-      elements.delete(:bytes) unless count_bytes
-    end
-    elements.values.join(' ')
+def render_total_counts(total_counts)
+  total_counts.map do |total_count|
+    total_count.values.join(' ')
   end.join("\n")
 end
 
@@ -87,7 +89,17 @@ file_texts = if file_names[0]
              end
 
 text_counts = get_text_counts(file_texts, file_names)
-total, max_lengths = get_total_and_max_lengths(text_counts, file_names)
-text_counts << total if file_names.size >= 2
-text_counts = format_text_counts(text_counts, max_lengths)
-puts render(text_counts, **params)
+
+if file_names.size >= 2
+  total = get_total(text_counts)
+  max_lengths = get_max_lengths(total, keys_to_keep)
+
+  text_counts = format_text_counts(text_counts, max_lengths, keys_to_keep)
+  total_counts = format_text_counts(total, max_lengths, keys_to_keep)
+  puts render_text_counts(text_counts)
+  puts render_total_counts(total_counts)
+else
+  max_lengths = get_max_lengths(text_counts, keys_to_keep)
+  text_counts = format_text_counts(text_counts, max_lengths, keys_to_keep)
+  puts render_text_counts(text_counts)
+end
