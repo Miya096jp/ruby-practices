@@ -52,7 +52,8 @@ def get_max_lengths(text_counts, option_keys)
   option_keys.zip(max_lengths).to_h
 end
 
-def render_lines(text_counts, max_lengths, option_keys)
+# 行数、語数、バイト数を文字列変換しパディングを追加 
+def format_text_counts(text_counts, max_lengths, option_keys)
   text_counts.map do |text_count|
     hash = {}
     option_keys.each do |key|
@@ -63,8 +64,8 @@ def render_lines(text_counts, max_lengths, option_keys)
   end
 end
 
-def render_in_one_line(text_counts, max_lengths, option_keys)
-  text_counts = render_lines(text_counts, max_lengths, option_keys)
+def render(text_counts, max_lengths, option_keys)
+  text_counts = format_text_counts(text_counts, max_lengths, option_keys)
   text_counts.map do |text_count|
     text_count.values.join(' ')
   end.join("\n")
@@ -80,5 +81,5 @@ file_texts = if file_names[0]
 text_counts = get_text_counts(file_texts, file_names)
 total = get_total(text_counts)
 max_lengths = get_max_lengths(total, option_keys)
-puts render_in_one_line(text_counts, max_lengths, option_keys)
-puts render_in_one_line(total, max_lengths, option_keys) if file_names.size >= 2
+puts render(text_counts, max_lengths, option_keys)
+puts render(total, max_lengths, option_keys) if file_names.size >= 2
