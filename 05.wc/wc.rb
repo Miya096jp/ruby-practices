@@ -33,14 +33,14 @@ def calculate_text_counts(file_texts, file_names)
 end
 
 def calculate_total(text_counts)
-  [text_counts.each_with_object({}) do |text_count, counts|
+  text_counts.each_with_object({}) do |text_count, counts|
     text_count.each do |key, value|
       if key != :name
         counts[key] ||= 0
         counts[key] += value
       end
     end
-  end]
+  end
 end
 
 def calculate_max_lengths(text_counts, option_keys)
@@ -57,15 +57,12 @@ def format_text_counts(text_counts, max_lengths, option_keys)
       hash[key] = text_count[key].to_s.rjust(max_lengths[key] >= 7 ? max_lengths[key] : 7)
     end
     hash[:name] = text_count[:name]
-    hash
+    hash.values.join(' ')
   end
 end
 
 def format(text_counts, max_lengths, option_keys)
-  text_counts = format_text_counts(text_counts, max_lengths, option_keys)
-  text_counts.map do |text_count|
-    text_count.values.join(' ')
-  end.join("\n")
+  format_text_counts(text_counts, max_lengths, option_keys).join("\n")
 end
 
 file_names = ARGV
@@ -76,10 +73,10 @@ file_texts = if file_names[0]
              end
 
 text_counts = calculate_text_counts(file_texts, file_names)
-total = calculate_total(text_counts)
+total = [calculate_total(text_counts)]
 max_lengths = calculate_max_lengths(total, option_keys)
 puts format(text_counts, max_lengths, option_keys)
 if file_names.size >= 2
   total[0][:name] = 'total'
-  puts format(total, max_lengths, option_keys) if file_names.size >= 2
+  puts format_text_counts(total, max_lengths, option_keys) if file_names.size >= 2
 end
