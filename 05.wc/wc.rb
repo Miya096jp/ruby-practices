@@ -21,7 +21,7 @@ else
   option_keys << :bytes if options[:count_bytes]
 end
 
-def get_text_counts(file_texts, file_names)
+def calculate_text_counts(file_texts, file_names)
   file_texts.map.with_index do |file_text, idx|
     {
       lines: file_text.count("\n"),
@@ -32,27 +32,24 @@ def get_text_counts(file_texts, file_names)
   end
 end
 
-def get_total(text_counts)
-  total = text_counts.each_with_object({}) do |text_count, hash_for_totaling_values|
+def calculate_total(text_counts)
+  [text_counts.each_with_object({}) do |text_count, counts|
     text_count.each do |key, value|
       if key != :name
-        hash_for_totaling_values[key] ||= 0
-        hash_for_totaling_values[key] += value
+        counts[key] ||= 0
+        counts[key] += value
       end
     end
-    hash_for_totaling_values[:name] = 'total'
-  end
-  [total]
+  end]
 end
 
-def get_max_lengths(text_counts, option_keys)
+def calculate_max_lengths(text_counts, option_keys)
   max_lengths = option_keys.map do |key|
     text_counts.map { |text_count| text_count[key].to_s.size }.max
   end
   option_keys.zip(max_lengths).to_h
 end
 
-# 行数、語数、バイト数を文字列変換しパディングを追加 
 def format_text_counts(text_counts, max_lengths, option_keys)
   text_counts.map do |text_count|
     hash = {}
@@ -64,7 +61,7 @@ def format_text_counts(text_counts, max_lengths, option_keys)
   end
 end
 
-def render(text_counts, max_lengths, option_keys)
+def format(text_counts, max_lengths, option_keys)
   text_counts = format_text_counts(text_counts, max_lengths, option_keys)
   text_counts.map do |text_count|
     text_count.values.join(' ')
@@ -78,8 +75,11 @@ file_texts = if file_names[0]
                [ARGF.readlines.join]
              end
 
-text_counts = get_text_counts(file_texts, file_names)
-total = get_total(text_counts)
-max_lengths = get_max_lengths(total, option_keys)
-puts render(text_counts, max_lengths, option_keys)
-puts render(total, max_lengths, option_keys) if file_names.size >= 2
+text_counts = calculate_text_counts(file_texts, file_names)
+total = calculate_total(text_counts)
+max_lengths = calculate_max_lengths(total, option_keys)
+puts format(text_counts, max_lengths, option_keys)
+if file_names.size >= 2
+  total[0][:name] = 'total'
+  puts format(total, max_lengths, option_keys) if file_names.size >= 2
+end
