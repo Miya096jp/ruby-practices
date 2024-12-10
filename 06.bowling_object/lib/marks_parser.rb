@@ -4,12 +4,12 @@ require_relative 'shot'
 require_relative 'frame'
 require_relative 'final_frame'
 
-class MarksParser
+class Marks
   def initialize(marks)
     @marks = marks
   end
 
-  def parse_marks
+  def parse
     shots = create_shot_instances(@marks)
     frames = group_shots_into_frames(shots)
     create_frame_instances(frames)

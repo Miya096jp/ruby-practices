@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class Game
-  def initialize(all_frame_instances)
-    @all_frame_instances = all_frame_instances
+  def initialize(frames)
+    @frames = frames
   end
 
   def calc_score
-    @all_frame_instances.each.sum(&:score)
+    @frames.each.sum(&:score)
   end
 end
