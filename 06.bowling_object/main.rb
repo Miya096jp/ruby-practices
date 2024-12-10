@@ -9,6 +9,6 @@ require_relative 'lib/final_frame'
 require_relative 'lib/shot'
 
 marks = Marks.new(ARGV[0])
-all_frame_instances = marks.parse
-game = Game.new(all_frame_instances)
+frames = marks.parse
+game = Game.new(frames)
 puts game.calc_score
