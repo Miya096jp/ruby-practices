@@ -42,10 +42,6 @@ class Frame
   end
 
   def bonus_for_strike
-    next_two_shots
-  end
-
-  def next_two_shots
     if @next_frame.final_frame?
       @next_frame.bonus_for_strike
     elsif @next_frame.strike?
@@ -56,10 +52,6 @@ class Frame
   end
 
   def bonus_for_spare
-    next_shot
-  end
-
-  def next_shot
     @next_frame.first_shot.score
   end
 end
