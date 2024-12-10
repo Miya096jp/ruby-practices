@@ -3,13 +3,12 @@
 require_relative 'shot'
 
 class Frame
-  attr_reader :first_shot, :second_shot
-  attr_accessor :next_frame
+  attr_reader :next_frame, :first_shot, :second_shot
 
-  def initialize(first_shot, second_shot = nil)
+  def initialize(first_shot, second_shot = nil, next_frame: nil)
     @first_shot = first_shot
     @second_shot = second_shot
-    @next_frame = nil
+    @next_frame = next_frame
   end
 
   def final_frame?

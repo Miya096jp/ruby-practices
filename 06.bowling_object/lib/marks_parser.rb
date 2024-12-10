@@ -12,8 +12,7 @@ class MarksParser
   def parse_marks
     shots = create_shot_instances(@marks)
     frames = group_shots_into_frames(shots)
-    regular_frame_instances, final_frame_instance = create_frame_instances(frames)
-    link_frames(regular_frame_instances, final_frame_instance)
+    create_frame_instances(frames)
   end
 
   def group_shots_into_frames(shots)
@@ -36,22 +35,21 @@ class MarksParser
 
   def create_frame_instances(frames)
     final_frame = frames.pop
-    [create_regular_frame_instances(frames), create_final_frame_instance(final_frame)]
+    final_frame_instance = create_final_frame_instance(final_frame)
+    regular_frame_instances = create_regular_frame_instances(frames, final_frame_instance)
+    regular_frame_instances + [final_frame_instance]
   end
 
-  def create_regular_frame_instances(regular_frames)
-    regular_frames.map { |regular_frame| Frame.new(*regular_frame) }
+  def create_regular_frame_instances(regular_frames, final_frame_instance)
+    next_frame = final_frame_instance
+    regular_frames.reverse.map do |regular_frame|
+      current_frame = Frame.new(*regular_frame, next_frame:)
+      next_frame = current_frame
+      current_frame
+    end.reverse
   end
 
   def create_final_frame_instance(final_frame)
     FinalFrame.new(*final_frame)
-  end
-
-  def link_frames(regular_frame_instances, final_frame_instance)
-    regular_frame_instances.each_with_index do |regular_frame_instance, idx|
-      regular_frame_instance.next_frame = regular_frame_instances[idx + 1]
-    end
-    regular_frame_instances.last.next_frame = final_frame_instance
-    regular_frame_instances + [final_frame_instance]
   end
 end
