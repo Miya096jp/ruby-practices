@@ -2,7 +2,7 @@
 
 # frozen_string_literal: true
 
-require_relative 'lib/marks_parser'
+require_relative 'lib/marks'
 require_relative 'lib/game'
 require_relative 'lib/frame'
 require_relative 'lib/final_frame'

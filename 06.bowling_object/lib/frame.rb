@@ -11,6 +11,10 @@ class Frame
     @next_frame = next_frame
   end
 
+  def score
+    frame_sum + add_bonus
+  end
+
   def final_frame?
     false
   end
@@ -19,26 +23,8 @@ class Frame
     @first_shot.score == 10
   end
 
-  def spare?
-    !strike? && frame_sum == 10
-  end
-
   def frame_sum
-    [@first_shot, @second_shot].sum { |shot| shot.nil? ? 0 : shot.score }
-  end
-
-  def score
-    frame_sum + add_bonus
-  end
-
-  def add_bonus
-    if strike?
-      bonus_for_strike
-    elsif spare?
-      bonus_for_spare
-    else
-      0
-    end
+    [@first_shot, @second_shot].compact.sum(&:score)
   end
 
   def bonus_for_strike
@@ -53,5 +39,21 @@ class Frame
 
   def bonus_for_spare
     @next_frame.first_shot.score
+  end
+
+  private
+
+  def spare?
+    !strike? && frame_sum == 10
+  end
+
+  def add_bonus
+    if strike?
+      bonus_for_strike
+    elsif spare?
+      bonus_for_spare
+    else
+      0
+    end
   end
 end

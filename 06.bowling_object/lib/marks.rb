@@ -15,6 +15,8 @@ class Marks
     create_frame_instances(frames)
   end
 
+  private
+
   def group_shots_into_frames(shots)
     frames = []
     shots.each do |shot|
