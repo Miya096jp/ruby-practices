@@ -13,10 +13,10 @@ class FinalFrame < Frame
   end
 
   def bonus_for_strike
-    [@first_shot.score, @second_shot.score].sum
+    [@first_shot, @second_shot].sum(&:score)
   end
 
   def score
-    [@first_shot, @second_shot, @third_shot].sum { |shot| shot.nil? ? 0 : shot.score }
+    [@first_shot, @second_shot, @third_shot].compact.sum(&:score)
   end
 end
