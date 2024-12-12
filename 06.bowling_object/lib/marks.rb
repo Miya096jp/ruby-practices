@@ -18,7 +18,7 @@ class Marks
   private
 
   def group_shots_into_frames(shots)
-    frames = []
+    frames = [[]]
     shots.each do |shot|
       frames << [] if frames.size < 10 && next_frame?(frames)
       frames.last << shot
@@ -28,7 +28,7 @@ class Marks
 
   def next_frame?(frames)
     rolls = frames.last
-    frames.empty? || rolls[0].score == 10 || rolls.size == 2
+    rolls[0]&.score == 10 || rolls.size == 2
   end
 
   def create_shot_instances(marks)
@@ -45,9 +45,7 @@ class Marks
   def create_regular_frame_instances(regular_frames, final_frame_instance)
     next_frame = final_frame_instance
     regular_frames.reverse.map do |regular_frame|
-      current_frame = Frame.new(*regular_frame, next_frame:)
-      next_frame = current_frame
-      current_frame
+      next_frame = Frame.new(*regular_frame, next_frame:)
     end.reverse
   end
 
