@@ -17,7 +17,7 @@ MODE_TABLE = {
   '5' => 'r_x',
   '6' => 'rw_',
   '7' => 'rwx'
-}
+}.freeze
 
 COLUMN = 3
 
@@ -63,21 +63,25 @@ class Paths
 end
 
 class Entry
-  def initialize(path)
+  def initialize(path, stat)
     @path = path
-    @stat = File::Stat.new(path)
+    @stat = stat
   end
 
   def name
     File.basename(@path)
   end
 
-  def type_and_mode
-    format_type_and_mode(@stat)
+  def type
+    format_type(@stat)
+  end
+
+  def mode
+    format_mode(@stat)
   end
 
   def nlink
-    @stat.nlink.to_s
+    @stat.nlink
   end
 
   def username
@@ -85,15 +89,15 @@ class Entry
   end
 
   def groupname
-    Etc.getgrgid(@stat.uid).name
+    Etc.getgrgid(@stat.gid).name
   end
 
   def bytesize
-    @stat.size.to_s
+    @stat.size
   end
 
   def mtime
-    format_mtime(@stat.mtime)
+    @stat.mtime
   end
 
   def blocks
@@ -102,26 +106,18 @@ class Entry
 
   private
 
-  def format_type_and_mode(stat)
-    type = stat.directory? ? 'd' : '-'
-    digits = stat.mode.to_s(8)[-3..]
-    mode = digits.gsub(/./, MODE_TABLE)
-    "#{type}#{mode}"
+  def format_type(stat)
+    stat.directory? ? 'd' : '-'
   end
 
-  def format_mtime(mtime)
-    format('%<mon>2d %<mday>2d %<hour>2d:%<min>2d', mon: mtime.mon, mday: mtime.mday, hour: mtime.hour, min: mtime.min)
+  def format_mode(stat)
+    stat.mode.to_s(8)[-3..]
   end
 end
 
 class LsFormatter
-  def initialize(entries, options = nil)
+  def initialize(entries)
     @entries = entries
-    @options = options
-  end
-
-  def print
-    @options.long_format? ? LsLong.new(@entries).print : LsShort.new(@entries).print
   end
 end
 
@@ -141,7 +137,7 @@ class LsShort < LsFormatter
   end
 
   def count_row
-    (@entries.size.to_f / COLUMN ).ceil
+    (@entries.size.to_f / COLUMN).ceil
   end
 
   def slice_entries(entries, row)
@@ -162,10 +158,10 @@ class LsLong < LsFormatter
 
   def build_max_size
     {
-      nlink: @entries.map { |entry| entry.nlink.size }.max,
+      nlink: @entries.map { |entry| entry.nlink.to_s.size }.max,
       username: @entries.map { |entry| entry.username.size }.max,
       groupname: @entries.map { |entry| entry.groupname.size }.max,
-      bytesize: @entries.map { |entry| entry.bytesize.size }.max
+      bytesize: @entries.map { |entry| entry.bytesize.to_s.size }.max
     }
   end
 
@@ -177,15 +173,24 @@ class LsLong < LsFormatter
   def build_body(max_size)
     @entries.map do |entry|
       [
-        entry.type_and_mode,
-        entry.nlink.rjust(max_size[:nlink] + 1),
+        "#{entry.type}#{format_mode(entry)}",
+        entry.nlink.to_s.rjust(max_size[:nlink] + 1),
         entry.username.rjust(max_size[:username] + 1),
         entry.groupname.rjust(max_size[:groupname] + 1),
-        entry.bytesize.rjust(max_size[:bytesize] + 1),
-        " #{entry.mtime}",
+        entry.bytesize.to_s.rjust(max_size[:bytesize] + 1),
+        " #{format_mtime(entry.mtime)}",
         " #{entry.name}"
       ].join
     end
+  end
+
+  def format_mode(entry)
+    digits = entry.mode
+    digits.gsub(/./, MODE_TABLE)
+  end
+
+  def format_mtime(mtime)
+    format('%<mon>2d %<mday>2d %<hour>2d:%<min>2d', mon: mtime.mon, mday: mtime.mday, hour: mtime.hour, min: mtime.min)
   end
 end
 
@@ -194,8 +199,10 @@ class Ls
     opts = OptionParser.new
     options = Options.new(opts)
     paths = Paths.new(options, find_input).parse
-    entries = paths.map { |path| Entry.new(path) }
-    LsFormatter.new(entries, options).print
+    entries = paths.map { |path| Entry.new(path, File::Stat.new(path)) }
+    LsFormatter.new(entries)
+    ls = options.long_format? ? LsLong.new(entries) : LsShort.new(entries)
+    ls.print
   end
 
   def self.find_input
