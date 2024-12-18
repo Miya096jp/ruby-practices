@@ -8,15 +8,47 @@ require 'etc'
 
 COLUMN = 3
 
-MODE_TABLE = {
-  '0' => '___',
-  '1' => '__x',
-  '2' => '_w_',
-  '3' => '_wx',
-  '4' => 'r__',
-  '5' => 'r_x',
-  '6' => 'rw_',
+FILETYPE = {
+  '1' => 'p',
+  '2' => 'c',
+  '4' => 'd',
+  '6' => 'b',
+  '10' => '-',
+  '12' => 'l',
+  '14' => 's'
+}.freeze
+
+REGULAR_MODE = {
+  '0' => '---',
+  '1' => '--x',
+  '2' => '-w-',
+  '3' => '-wx',
+  '4' => 'r--',
+  '5' => 'r-x',
+  '6' => 'rw-',
   '7' => 'rwx'
+}.freeze
+
+SUID_SGID = {
+  '0' => '---',
+  '1' => '--s',
+  '2' => '-wS',
+  '3' => '-ws',
+  '4' => 'r-S',
+  '5' => 'r-s',
+  '6' => 'rwS',
+  '7' => 'rws'
+}.freeze
+
+STICKY_BIT = {
+  '0' => '---',
+  '1' => '--t',
+  '2' => '-wT',
+  '3' => '-wt',
+  '4' => 'r-T',
+  '5' => 'r-t',
+  '6' => 'rwT',
+  '7' => 'rwt'
 }.freeze
 
 COLUMN = 3
@@ -80,6 +112,18 @@ class Entry
     format_mode(@stat)
   end
 
+  def setuid?
+    @stat.setuid?
+  end
+
+  def setgid?
+    @stat.setgid?
+  end
+
+  def sticky?
+    @stat.sticky?
+  end
+
   def nlink
     @stat.nlink
   end
@@ -107,7 +151,7 @@ class Entry
   private
 
   def format_type(stat)
-    stat.directory? ? 'd' : '-'
+    stat.mode.to_s(8)[..-5]
   end
 
   def format_mode(stat)
@@ -156,6 +200,8 @@ class LsLong < LsFormatter
     puts build_body(max_size)
   end
 
+  private
+
   def build_max_size
     {
       nlink: @entries.map { |entry| entry.nlink.to_s.size }.max,
@@ -173,7 +219,7 @@ class LsLong < LsFormatter
   def build_body(max_size)
     @entries.map do |entry|
       [
-        "#{entry.type}#{format_mode(entry)}",
+        "#{format_type(entry)}#{format_mode(entry)}",
         entry.nlink.to_s.rjust(max_size[:nlink] + 1),
         entry.username.rjust(max_size[:username] + 1),
         entry.groupname.rjust(max_size[:groupname] + 1),
@@ -184,9 +230,28 @@ class LsLong < LsFormatter
     end
   end
 
+  def format_type(entry)
+    digits = entry.type
+    digits.gsub(/./, FILETYPE)
+  end
+
   def format_mode(entry)
-    digits = entry.mode
-    digits.gsub(/./, MODE_TABLE)
+    digits = entry.mode.split('')
+    digits.map.with_index do |digit, index|
+      table_for_digits(digit, index, entry)
+    end.join
+  end
+
+  def table_for_digits(digit, index, entry)
+    if index.zero? && entry.setuid?
+      SUID_SGID[digit]
+    elsif index == 1 && entry.setgid?
+      SUID_SGID[digit]
+    elsif index == 2 && entry.sticky?
+      STICKY_BIT[digit]
+    else
+      REGULAR_MODE[digit]
+    end
   end
 
   def format_mtime(mtime)
