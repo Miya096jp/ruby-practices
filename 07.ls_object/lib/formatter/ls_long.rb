@@ -3,7 +3,7 @@
 class LsLong < LsFormatter
   def parse
     max_size = build_max_size
-    "#{build_total_row}\n#{build_body(max_size)}"
+    "#{build_total_row}\n#{build_body(max_size)}\n"
   end
 
   private

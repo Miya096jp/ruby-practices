@@ -8,6 +8,7 @@ require_relative './lib/paths'
 require_relative './lib/formatter/ls_formatter'
 require_relative './lib/formatter/ls_short'
 require_relative './lib/formatter/ls_long'
+require 'pathname'
 
 COLUMN = 3
 
@@ -55,30 +56,34 @@ STICKY_BIT = {
 }.freeze
 
 class Ls
-  def self.run(arguments = ARGV)
-    options = parse_options(arguments)
-    paths = parse_paths(options)
+  def initialize(pathname, options)
+    @pathname = pathname
+    @options = options
+  end
+
+  def run
+    paths = parse_paths(@pathname, @options)
     entries = parse_entries(paths)
-    ls = select_formatter(entries, options)
+    ls = select_formatter(entries, @options)
     ls.parse
   end
 
-  def self.parse_options(arguments)
-    opts = OptionParser.new
-    Options.new(opts, arguments)
+  private
+
+  def parse_paths(pathname, options)
+    Paths.new(pathname, options).parse
   end
 
-  def self.parse_paths(options)
-    Paths.new(options).parse
-  end
-
-  def self.parse_entries(paths)
+  def parse_entries(paths)
     paths.map { |path| Entry.new(path, File::Stat.new(path)) }
   end
 
-  def self.select_formatter(entries, options)
+  def select_formatter(entries, options)
     options.long_format? ? LsLong.new(entries) : LsShort.new(entries)
   end
 end
 
-puts Ls.run
+pathname = Pathname('./*')
+options = Options.new(ARGV)
+ls = Ls.new(pathname, options)
+puts ls.run

@@ -3,17 +3,13 @@
 require 'pathname'
 
 class Paths
-  def initialize(options)
+  def initialize(pathname, options)
+    @pathname = pathname
     @options = options
   end
 
-  # def parse
-  #   paths = @options.dot_match? ? Dir.glob('*', File::FNM_DOTMATCH).sort : Dir.glob('*')
-  #   reverse(paths)
-  # end
-
   def parse
-    paths = @options.dot_match? ? Dir.glob(Pathname('./*'), File::FNM_DOTMATCH).sort : Dir.glob(Pathname('./*'))
+    paths = @options.dot_match? ? Dir.glob(@pathname, File::FNM_DOTMATCH).sort : Dir.glob(@pathname)
     reverse(paths)
   end
 

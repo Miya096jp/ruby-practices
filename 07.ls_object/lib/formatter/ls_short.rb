@@ -5,7 +5,7 @@ class LsShort < LsFormatter
     entries = justfy_entries
     row = count_row
     sliced_entries = slice_entries(entries, row)
-    transpose(sliced_entries).map(&:join)
+    "#{transpose(sliced_entries).map { |entry| entry.join.rstrip }.join("\n")}\n"
   end
 
   private
