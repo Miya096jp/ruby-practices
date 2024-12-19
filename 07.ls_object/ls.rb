@@ -2,7 +2,6 @@
 
 # frozen_string_literal: true
 
-require 'pathname'
 require 'optparse'
 require 'etc'
 
@@ -51,8 +50,6 @@ STICKY_BIT = {
   '7' => 'rwt'
 }.freeze
 
-COLUMN = 3
-
 class Options
   def initialize(opts)
     opts.on('-l') { |v| @long_format = v }
@@ -75,19 +72,16 @@ class Options
 end
 
 class Paths
-  def initialize(options, input)
+  def initialize(options)
     @options = options
-    @input = input
-  end
-
-  def create_pathname
-    Pathname(@input)
   end
 
   def parse
-    paths = @options.dot_match? ? Dir.glob(create_pathname.join('*'), File::FNM_DOTMATCH).sort : Dir.glob(create_pathname.join('*'))
+    paths = @options.dot_match? ? Dir.glob('*', File::FNM_DOTMATCH).sort : Dir.glob('*')
     reverse(paths)
   end
+
+  private
 
   def reverse(paths)
     @options.reverse? ? paths.reverse : paths
@@ -146,6 +140,18 @@ class Entry
 
   def blocks
     @stat.blocks
+  end
+
+  def owner
+    format_mode(@stat).slice(0)
+  end
+
+  def group
+    format_mode(@stat).slice(1)
+  end
+
+  def others
+    format_mode(@stat).slice(2)
   end
 
   private
@@ -237,17 +243,17 @@ class LsLong < LsFormatter
 
   def format_mode(entry)
     digits = entry.mode.split('')
-    digits.map.with_index do |digit, index|
-      table_for_digits(digit, index, entry)
+    digits.map do |digit|
+      table_for_permissions(digit, entry)
     end.join
   end
 
-  def table_for_digits(digit, index, entry)
-    if index.zero? && entry.setuid?
+  def table_for_permissions(digit, entry)
+    if entry.owner && entry.setuid?
       SUID_SGID[digit]
-    elsif index == 1 && entry.setgid?
+    elsif entry.group && entry.setgid?
       SUID_SGID[digit]
-    elsif index == 2 && entry.sticky?
+    elsif entry.others && entry.sticky?
       STICKY_BIT[digit]
     else
       REGULAR_MODE[digit]
@@ -263,15 +269,11 @@ class Ls
   def self.run
     opts = OptionParser.new
     options = Options.new(opts)
-    paths = Paths.new(options, find_input).parse
+    paths = Paths.new(options).parse
     entries = paths.map { |path| Entry.new(path, File::Stat.new(path)) }
     LsFormatter.new(entries)
     ls = options.long_format? ? LsLong.new(entries) : LsShort.new(entries)
     ls.print
-  end
-
-  def self.find_input
-    ARGV[0] || '.'
   end
 end
 
