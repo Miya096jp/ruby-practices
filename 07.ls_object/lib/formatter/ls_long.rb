@@ -38,7 +38,7 @@ class LsLong < LsFormatter
 
   def format_type(entry)
     digits = entry.type
-    digits.gsub(/./, FILETYPE)
+    FILETYPE[digits]
   end
 
   def format_mode(entry)
