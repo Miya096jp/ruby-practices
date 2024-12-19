@@ -3,11 +3,11 @@
 require 'optparse'
 
 class Options
-  def initialize(opts)
+  def initialize(opts, arguments)
     opts.on('-l') { |v| @long_format = v }
     opts.on('-r') { |v| @reverse = v }
     opts.on('-a') { |v| @dot_match = v }
-    opts.parse!(ARGV)
+    opts.parse!(arguments)
   end
 
   def long_format?
