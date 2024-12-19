@@ -1,3 +1,4 @@
+
 #!/usr/bin/env ruby
 
 # frozen_string_literal: true
@@ -60,7 +61,7 @@ class Ls
     paths = parse_paths(options)
     entries = parse_entries(paths)
     ls = select_formatter(entries, options)
-    ls.parse
+    ls.print
   end
 
   def self.parse_options(arguments)
@@ -81,4 +82,4 @@ class Ls
   end
 end
 
-puts Ls.run
+Ls.run

@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class LsShort < LsFormatter
-  def print
+  def parse
     entries = justfy_entries
     row = count_row
     sliced_entries = slice_entries(entries, row)
-    transpose(sliced_entries).each { |entry| puts entry.join }
+    transpose(sliced_entries).map(&:join)
   end
 
   private

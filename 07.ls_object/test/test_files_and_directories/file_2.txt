@@ -1,14 +1,17 @@
-#!/usr/bin/env ruby
 
-# frozen_string_literal: true
+COLUMN = 3
 
-require_relative './lib/options'
-require_relative './lib/entry'
-require_relative './lib/paths'
-require_relative './lib/formatter/ls_formatter'
-require_relative './lib/formatter/ls_short'
-require_relative './lib/formatter/ls_long'
+FILETYPE = {
+  '1' => 'p',
+  '2' => 'c',
+  '4' => 'd',
+  '6' => 'b',
+  '10' => '-',
+  '12' => 'l',
+  '14' => 's'
+}.freeze
 
+REGULAR_MODE = {
 COLUMN = 3
 
 FILETYPE = {
@@ -60,25 +63,10 @@ class Ls
     paths = parse_paths(options)
     entries = parse_entries(paths)
     ls = select_formatter(entries, options)
-    ls.parse
+    ls.print
   end
 
   def self.parse_options(arguments)
     opts = OptionParser.new
     Options.new(opts, arguments)
   end
-
-  def self.parse_paths(options)
-    Paths.new(options).parse
-  end
-
-  def self.parse_entries(paths)
-    paths.map { |path| Entry.new(path, File::Stat.new(path)) }
-  end
-
-  def self.select_formatter(entries, options)
-    options.long_format? ? LsLong.new(entries) : LsShort.new(entries)
-  end
-end
-
-puts Ls.run

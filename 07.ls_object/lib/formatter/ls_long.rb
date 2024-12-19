@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 class LsLong < LsFormatter
-  def print
+  def parse
     max_size = build_max_size
-    puts build_total_row
-    puts build_body(max_size)
+    "#{build_total_row}\n#{build_body(max_size)}"
   end
 
   private
@@ -34,7 +33,7 @@ class LsLong < LsFormatter
         " #{format_mtime(entry.mtime)}",
         " #{entry.name}"
       ].join
-    end
+    end.join("\n")
   end
 
   def format_type(entry)
