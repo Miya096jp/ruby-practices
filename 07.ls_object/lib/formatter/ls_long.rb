@@ -37,27 +37,19 @@ class LsLong < LsFormatter
   end
 
   def format_type(entry)
-    digits = entry.type
-    FILETYPE[digits]
+    FILETYPE[entry.type]
   end
 
   def format_mode(entry)
-    digits = entry.mode.split('')
-    digits.map do |digit|
-      table_for_permissions(digit, entry)
-    end.join
-  end
-
-  def table_for_permissions(digit, entry)
-    if entry.owner && entry.setuid?
-      SUID_SGID[digit]
-    elsif entry.group && entry.setgid?
-      SUID_SGID[digit]
-    elsif entry.others && entry.sticky?
-      STICKY_BIT[digit]
+    if entry.setuid?
+      [SUID_SGID[entry.user], REGULAR_MODE[entry.group], REGULAR_MODE[entry.others]]
+    elsif entry.setgid?
+      [REGULAR_MODE[entry.user], SUID_SGID[entry.group], REGULAR_MODE[entry.others]]
+    elsif entry.sticky?
+      [REGULAR_MODE[entry.user], REGULAR_MODE[entry.group], STICKY_BIT[entry.others]]
     else
-      REGULAR_MODE[digit]
-    end
+      [REGULAR_MODE[entry.user], REGULAR_MODE[entry.group], REGULAR_MODE[entry.others]]
+    end.join
   end
 
   def format_mtime(mtime)

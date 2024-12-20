@@ -56,7 +56,7 @@ class Entry
     @stat.blocks
   end
 
-  def owner
+  def user
     format_mode(@stat).slice(0)
   end
 
