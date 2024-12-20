@@ -63,12 +63,12 @@ class TestLs < Minitest::Test
       -rw-r--r-- 1 miya staff 1044 12 19 20:51 file_2.txt
       -rw-r--r-- 1 miya staff 2332 12 19 20:49 file_3.txt
       -rw-r--r-- 1 miya staff 4439 12 19 20:50 file_4.txt
-      -rwsrwsrws 1 miya staff    0 12 19 14: 4 sgid_A
-      -rwsrwSrws 1 miya staff    0 12 19 14: 4 sgid_B
-      drwtrwtrwt 2 miya staff   64 12 19 14: 5 sticky_bit_A
-      drwtrwtrwT 2 miya staff   64 12 19 14: 5 sticky_bit_B
-      -rwSrwsrws 1 miya staff    0 12 19 14: 5 suid_A
-      -rw-r--r-- 1 miya staff    0 12 19 14: 5 suid_B
+      -rwxrwsrwx 1 miya staff    0 12 19 14: 4 sgid_A
+      -rwxrwSrwx 1 miya staff    0 12 19 14: 4 sgid_B
+      drwxrwxrwt 2 miya staff   64 12 19 14: 5 sticky_bit_A
+      drwxrwxrwT 2 miya staff   64 12 19 14: 5 sticky_bit_B
+      -rwsrwxrwx 1 miya staff    0 12 19 14: 5 suid_A
+      -rwSrwxrwx 1 miya staff    0 12 19 14: 5 suid_B
     TEXT
 
     @options = Options.new(['-l'])
@@ -79,12 +79,12 @@ class TestLs < Minitest::Test
   def test_run_with_all_options
     expected = <<~TEXT
       total: 40
-      -rw-r--r--  1 miya staff    0 12 19 14: 5 suid_B
-      -rwSrwsrws  1 miya staff    0 12 19 14: 5 suid_A
-      drwtrwtrwT  2 miya staff   64 12 19 14: 5 sticky_bit_B
-      drwtrwtrwt  2 miya staff   64 12 19 14: 5 sticky_bit_A
-      -rwsrwSrws  1 miya staff    0 12 19 14: 4 sgid_B
-      -rwsrwsrws  1 miya staff    0 12 19 14: 4 sgid_A
+      -rwSrwxrwx  1 miya staff    0 12 19 14: 5 suid_B
+      -rwsrwxrwx  1 miya staff    0 12 19 14: 5 suid_A
+      drwxrwxrwT  2 miya staff   64 12 19 14: 5 sticky_bit_B
+      drwxrwxrwt  2 miya staff   64 12 19 14: 5 sticky_bit_A
+      -rwxrwSrwx  1 miya staff    0 12 19 14: 4 sgid_B
+      -rwxrwsrwx  1 miya staff    0 12 19 14: 4 sgid_A
       -rw-r--r--  1 miya staff 4439 12 19 20:50 file_4.txt
       -rw-r--r--  1 miya staff 2332 12 19 20:49 file_3.txt
       -rw-r--r--  1 miya staff 1044 12 19 20:51 file_2.txt
