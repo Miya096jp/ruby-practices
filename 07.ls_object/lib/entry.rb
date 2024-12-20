@@ -56,18 +56,6 @@ class Entry
     @stat.blocks
   end
 
-  def user
-    format_mode(@stat).slice(0)
-  end
-
-  def group
-    format_mode(@stat).slice(1)
-  end
-
-  def others
-    format_mode(@stat).slice(2)
-  end
-
   private
 
   def format_type(stat)

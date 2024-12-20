@@ -41,14 +41,15 @@ class LsLong < LsFormatter
   end
 
   def format_mode(entry)
+    user, group, others = entry.mode.split('')
     if entry.setuid?
-      [SUID_SGID[entry.user], REGULAR_MODE[entry.group], REGULAR_MODE[entry.others]]
+      [SUID_SGID[user], REGULAR_MODE[group], REGULAR_MODE[others]]
     elsif entry.setgid?
-      [REGULAR_MODE[entry.user], SUID_SGID[entry.group], REGULAR_MODE[entry.others]]
+      [REGULAR_MODE[user], SUID_SGID[group], REGULAR_MODE[others]]
     elsif entry.sticky?
-      [REGULAR_MODE[entry.user], REGULAR_MODE[entry.group], STICKY_BIT[entry.others]]
+      [REGULAR_MODE[user], REGULAR_MODE[group], STICKY_BIT[others]]
     else
-      [REGULAR_MODE[entry.user], REGULAR_MODE[entry.group], REGULAR_MODE[entry.others]]
+      [REGULAR_MODE[user], REGULAR_MODE[group], REGULAR_MODE[others]]
     end.join
   end
 
