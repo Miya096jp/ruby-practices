@@ -5,7 +5,7 @@ class ShortFormatter
     @file_metadata_list = file_metadata_list
   end
 
-  def parse
+  def format
     entries = justfy_entries
     row = count_row(entries)
     sliced_entries = slice_entries(entries, row)

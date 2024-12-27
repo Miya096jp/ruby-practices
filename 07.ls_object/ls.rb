@@ -54,7 +54,7 @@ class Ls
     paths = parse_paths(@pathname, @options)
     file_metadata_list = build_file_metadata_list(paths)
     formatter = select_formatter(file_metadata_list, @options)
-    formatter.parse
+    formatter.format
   end
 
   private
