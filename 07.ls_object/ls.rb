@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 
 require_relative './lib/options'
-require_relative './lib/entry'
+require_relative './lib/file_metadata'
 require_relative './lib/paths'
 require_relative './lib/formatter/short_formatter'
 require_relative './lib/formatter/long_formatter'
@@ -52,8 +52,8 @@ class Ls
 
   def run
     paths = parse_paths(@pathname, @options)
-    entries = parse_entries(paths)
-    formatter = select_formatter(entries, @options)
+    file_metadata_list = build_file_metadata_list(paths)
+    formatter = select_formatter(file_metadata_list, @options)
     formatter.parse
   end
 
@@ -63,12 +63,12 @@ class Ls
     Paths.new(pathname, options).parse
   end
 
-  def parse_entries(paths)
-    paths.map { |path| Entry.new(path, File::Stat.new(path)) }
+  def build_file_metadata_list(paths)
+    paths.map { |path| FileMetadata.new(path, File::Stat.new(path)) }
   end
 
-  def select_formatter(entries, options)
-    options.long_format? ? LongFormatter.new(entries) : ShortFormatter.new(entries)
+  def select_formatter(file_metadata_list, options)
+    options.long_format? ? LongFormatter.new(file_metadata_list) : ShortFormatter.new(file_metadata_list)
   end
 end
 
