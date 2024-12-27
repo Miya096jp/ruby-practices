@@ -51,16 +51,16 @@ class Ls
   end
 
   def run
-    paths = parse_paths(@pathname, @options)
+    paths = collect_paths(@pathname, @options)
     file_metadata_list = build_file_metadata_list(paths)
     formatter = select_formatter(file_metadata_list, @options)
-    formatter.format
+    formatter.format_output
   end
 
   private
 
-  def parse_paths(pathname, options)
-    Paths.new(pathname, options).parse
+  def collect_paths(pathname, options)
+    Paths.new(pathname, options).paths
   end
 
   def build_file_metadata_list(paths)

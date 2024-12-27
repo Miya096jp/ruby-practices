@@ -17,7 +17,7 @@ class LongFormatter
 
   private_constant :FILETYPE
 
-  def format
+  def format_output
     max_size = build_max_size
     "#{build_total_row}\n#{build_body(max_size)}\n"
   end
