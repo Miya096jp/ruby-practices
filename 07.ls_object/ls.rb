@@ -12,16 +12,6 @@ require 'pathname'
 
 COLUMN = 3
 
-FILETYPE = {
-  '1' => 'p',
-  '2' => 'c',
-  '4' => 'd',
-  '6' => 'b',
-  '10' => '-',
-  '12' => 'l',
-  '14' => 's'
-}.freeze
-
 REGULAR_MODE = {
   '0' => '---',
   '1' => '--x',

@@ -1,6 +1,18 @@
 # frozen_string_literal: true
 
 class LsLong < LsFormatter
+  FILETYPE = {
+    '1' => 'p',
+    '2' => 'c',
+    '4' => 'd',
+    '6' => 'b',
+    '10' => '-',
+    '12' => 'l',
+    '14' => 's'
+  }.freeze
+
+  private_constant :FILETYPE
+
   def parse
     max_size = build_max_size
     "#{build_total_row}\n#{build_body(max_size)}\n"
