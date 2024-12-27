@@ -5,6 +5,10 @@ class ShortFormatter
     @file_metadata_list = file_metadata_list
   end
 
+  COLUMN = 3
+
+  private_constant :COLUMN
+
   def format_output
     entries = justfy_entries
     row = count_row(entries)

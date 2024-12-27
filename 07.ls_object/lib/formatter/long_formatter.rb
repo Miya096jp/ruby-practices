@@ -15,7 +15,40 @@ class LongFormatter
     '14' => 's'
   }.freeze
 
-  private_constant :FILETYPE
+  REGULAR_MODE = {
+    '0' => '---',
+    '1' => '--x',
+    '2' => '-w-',
+    '3' => '-wx',
+    '4' => 'r--',
+    '5' => 'r-x',
+    '6' => 'rw-',
+    '7' => 'rwx'
+  }.freeze
+
+  SUID_SGID = {
+    '0' => '---',
+    '1' => '--s',
+    '2' => '-wS',
+    '3' => '-ws',
+    '4' => 'r-S',
+    '5' => 'r-s',
+    '6' => 'rwS',
+    '7' => 'rws'
+  }.freeze
+
+  STICKY_BIT = {
+    '0' => '---',
+    '1' => '--t',
+    '2' => '-wT',
+    '3' => '-wt',
+    '4' => 'r-T',
+    '5' => 'r-t',
+    '6' => 'rwT',
+    '7' => 'rwt'
+  }.freeze
+
+  private_constant :FILETYPE, :REGULAR_MODE, :SUID_SGID, :STICKY_BIT
 
   def format_output
     max_size = build_max_size
