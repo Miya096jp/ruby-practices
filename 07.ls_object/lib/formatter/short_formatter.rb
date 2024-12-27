@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 class ShortFormatter
-  def initialize(entries)
-    @entries = entries
+  def initialize(file_metadata_list)
+    @file_metadata_list = file_metadata_list
   end
 
   def parse
     entries = justfy_entries
-    row = count_row
+    row = count_row(entries)
     sliced_entries = slice_entries(entries, row)
     "#{transpose(sliced_entries).map { |entry| entry.join.rstrip }.join("\n")}\n"
   end
@@ -15,12 +15,12 @@ class ShortFormatter
   private
 
   def justfy_entries
-    max_length = @entries.map { |entry| entry.name.size }.max
-    @entries.map { |entry| entry.name.ljust(max_length + 1) }
+    max_length = @file_metadata_list.map { |file_metadata| file_metadata.name.size }.max
+    @file_metadata_list.map { |file_metadata| file_metadata.name.ljust(max_length + 1) }
   end
 
-  def count_row
-    (@entries.size.to_f / COLUMN).ceil
+  def count_row(entries)
+    (entries.size.to_f / COLUMN).ceil
   end
 
   def slice_entries(entries, row)
