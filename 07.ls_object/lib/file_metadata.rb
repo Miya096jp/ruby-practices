@@ -2,7 +2,7 @@
 
 require 'etc'
 
-class Entry
+class FileMetadata
   def initialize(path, stat)
     @path = path
     @stat = stat
