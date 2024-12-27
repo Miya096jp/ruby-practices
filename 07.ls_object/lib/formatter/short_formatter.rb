@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
-class LsShort < LsFormatter
+class ShortFormatter
+  def initialize(entries)
+    @entries = entries
+  end
+
   def parse
     entries = justfy_entries
     row = count_row

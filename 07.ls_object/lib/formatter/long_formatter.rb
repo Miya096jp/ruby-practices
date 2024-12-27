@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
-class LsLong < LsFormatter
+class LongFormatter
+  def initialize(entries)
+    @entries = entries
+  end
+
   FILETYPE = {
     '1' => 'p',
     '2' => 'c',

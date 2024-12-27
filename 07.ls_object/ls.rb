@@ -5,9 +5,8 @@
 require_relative './lib/options'
 require_relative './lib/entry'
 require_relative './lib/paths'
-require_relative './lib/formatter/ls_formatter'
-require_relative './lib/formatter/ls_short'
-require_relative './lib/formatter/ls_long'
+require_relative './lib/formatter/short_formatter'
+require_relative './lib/formatter/long_formatter'
 require 'pathname'
 
 COLUMN = 3
@@ -54,8 +53,8 @@ class Ls
   def run
     paths = parse_paths(@pathname, @options)
     entries = parse_entries(paths)
-    ls = select_formatter(entries, @options)
-    ls.parse
+    formatter = select_formatter(entries, @options)
+    formatter.parse
   end
 
   private
@@ -69,7 +68,7 @@ class Ls
   end
 
   def select_formatter(entries, options)
-    options.long_format? ? LsLong.new(entries) : LsShort.new(entries)
+    options.long_format? ? LongFormatter.new(entries) : ShortFormatter.new(entries)
   end
 end
 
