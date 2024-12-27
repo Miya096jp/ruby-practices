@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class LongFormatter
-  def initialize(entries)
-    @entries = entries
+  def initialize(file_metadata_list)
+    @file_metadata_list = file_metadata_list
   end
 
   FILETYPE = {
@@ -26,43 +26,43 @@ class LongFormatter
 
   def build_max_size
     {
-      nlink: @entries.map { |entry| entry.nlink.to_s.size }.max,
-      username: @entries.map { |entry| entry.username.size }.max,
-      groupname: @entries.map { |entry| entry.groupname.size }.max,
-      bytesize: @entries.map { |entry| entry.bytesize.to_s.size }.max
+      nlink: @file_metadata_list.map { |file_metadata| file_metadata.nlink.to_s.size }.max,
+      username: @file_metadata_list.map { |file_metadata| file_metadata.username.size }.max,
+      groupname: @file_metadata_list.map { |file_metadata| file_metadata.groupname.size }.max,
+      bytesize: @file_metadata_list.map { |file_metadata| file_metadata.bytesize.to_s.size }.max
     }
   end
 
   def build_total_row
-    total = @entries.sum { |entry| entry.blocks.to_i }
+    total = @file_metadata_list.sum { |file_metadata| file_metadata.blocks.to_i }
     "total: #{total}"
   end
 
   def build_body(max_size)
-    @entries.map do |entry|
+    @file_metadata_list.map do |file_metadata|
       [
-        "#{format_type(entry)}#{format_mode(entry)}",
-        entry.nlink.to_s.rjust(max_size[:nlink] + 1),
-        entry.username.rjust(max_size[:username] + 1),
-        entry.groupname.rjust(max_size[:groupname] + 1),
-        entry.bytesize.to_s.rjust(max_size[:bytesize] + 1),
-        " #{format_mtime(entry.mtime)}",
-        " #{entry.name}"
+        "#{format_type(file_metadata)}#{format_mode(file_metadata)}",
+        file_metadata.nlink.to_s.rjust(max_size[:nlink] + 1),
+        file_metadata.username.rjust(max_size[:username] + 1),
+        file_metadata.groupname.rjust(max_size[:groupname] + 1),
+        file_metadata.bytesize.to_s.rjust(max_size[:bytesize] + 1),
+        " #{format_mtime(file_metadata.mtime)}",
+        " #{file_metadata.name}"
       ].join
     end.join("\n")
   end
 
-  def format_type(entry)
-    FILETYPE[entry.type]
+  def format_type(file_metadata)
+    FILETYPE[file_metadata.type]
   end
 
-  def format_mode(entry)
-    user, group, others = entry.mode.split('')
-    if entry.setuid?
+  def format_mode(file_metadata)
+    user, group, others = file_metadata.mode.split('')
+    if file_metadata.setuid?
       [SUID_SGID[user], REGULAR_MODE[group], REGULAR_MODE[others]]
-    elsif entry.setgid?
+    elsif file_metadata.setgid?
       [REGULAR_MODE[user], SUID_SGID[group], REGULAR_MODE[others]]
-    elsif entry.sticky?
+    elsif file_metadata.sticky?
       [REGULAR_MODE[user], REGULAR_MODE[group], STICKY_BIT[others]]
     else
       [REGULAR_MODE[user], REGULAR_MODE[group], REGULAR_MODE[others]]
