@@ -1,0 +1,103 @@
+# frozen_string_literal: true
+
+class LongFormatter
+  def initialize(file_metadata_list)
+    @file_metadata_list = file_metadata_list
+  end
+
+  FILETYPE = {
+    '1' => 'p',
+    '2' => 'c',
+    '4' => 'd',
+    '6' => 'b',
+    '10' => '-',
+    '12' => 'l',
+    '14' => 's'
+  }.freeze
+
+  REGULAR_MODE = {
+    '0' => '---',
+    '1' => '--x',
+    '2' => '-w-',
+    '3' => '-wx',
+    '4' => 'r--',
+    '5' => 'r-x',
+    '6' => 'rw-',
+    '7' => 'rwx'
+  }.freeze
+
+  SUID_SGID = {
+    '0' => '---',
+    '1' => '--s',
+    '2' => '-wS',
+    '3' => '-ws',
+    '4' => 'r-S',
+    '5' => 'r-s',
+    '6' => 'rwS',
+    '7' => 'rws'
+  }.freeze
+
+  STICKY_BIT = {
+    '0' => '---',
+    '1' => '--t',
+    '2' => '-wT',
+    '3' => '-wt',
+    '4' => 'r-T',
+    '5' => 'r-t',
+    '6' => 'rwT',
+    '7' => 'rwt'
+  }.freeze
+
+  private_constant :FILETYPE, :REGULAR_MODE, :SUID_SGID, :STICKY_BIT
+
+  def format_output
+    max_size = build_max_size
+    "#{build_total_row}\n#{build_body(max_size)}\n"
+  end
+
+  private
+
+  def build_max_size
+    {
+      nlink: @file_metadata_list.map { |file_metadata| file_metadata.nlink.to_s.size }.max,
+      username: @file_metadata_list.map { |file_metadata| file_metadata.username.size }.max,
+      groupname: @file_metadata_list.map { |file_metadata| file_metadata.groupname.size }.max,
+      bytesize: @file_metadata_list.map { |file_metadata| file_metadata.bytesize.to_s.size }.max
+    }
+  end
+
+  def build_total_row
+    total = @file_metadata_list.sum { |file_metadata| file_metadata.blocks.to_i }
+    "total: #{total}"
+  end
+
+  def build_body(max_size)
+    @file_metadata_list.map do |file_metadata|
+      [
+        "#{format_type(file_metadata)}#{format_mode(file_metadata)}",
+        file_metadata.nlink.to_s.rjust(max_size[:nlink] + 1),
+        file_metadata.username.rjust(max_size[:username] + 1),
+        file_metadata.groupname.rjust(max_size[:groupname] + 1),
+        file_metadata.bytesize.to_s.rjust(max_size[:bytesize] + 1),
+        " #{format_mtime(file_metadata.mtime)}",
+        " #{file_metadata.name}"
+      ].join
+    end.join("\n")
+  end
+
+  def format_type(file_metadata)
+    FILETYPE[file_metadata.type]
+  end
+
+  def format_mode(file_metadata)
+    user, group, others = file_metadata.mode.split('')
+    user_permission = file_metadata.setuid? ? SUID_SGID : REGULAR_MODE
+    group_permission = file_metadata.setgid? ? SUID_SGID : REGULAR_MODE
+    others_permission = file_metadata.sticky? ? STICKY_BIT : REGULAR_MODE
+    [user_permission[user], group_permission[group], others_permission[others]].join
+  end
+
+  def format_mtime(mtime)
+    format('%<mon>2d %<mday>2d %<hour>2d:%<min>2d', mon: mtime.mon, mday: mtime.mday, hour: mtime.hour, min: mtime.min)
+  end
+end
