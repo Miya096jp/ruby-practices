@@ -91,15 +91,10 @@ class LongFormatter
 
   def format_mode(file_metadata)
     user, group, others = file_metadata.mode.split('')
-    if file_metadata.setuid?
-      [SUID_SGID[user], REGULAR_MODE[group], REGULAR_MODE[others]]
-    elsif file_metadata.setgid?
-      [REGULAR_MODE[user], SUID_SGID[group], REGULAR_MODE[others]]
-    elsif file_metadata.sticky?
-      [REGULAR_MODE[user], REGULAR_MODE[group], STICKY_BIT[others]]
-    else
-      [REGULAR_MODE[user], REGULAR_MODE[group], REGULAR_MODE[others]]
-    end.join
+    user_permission = file_metadata.setuid? ? SUID_SGID : REGULAR_MODE
+    group_permission = file_metadata.setgid? ? SUID_SGID : REGULAR_MODE
+    others_permission = file_metadata.sticky? ? STICKY_BIT : REGULAR_MODE
+    [user_permission[user], group_permission[group], others_permission[others]].join
   end
 
   def format_mtime(mtime)
